@@ -51,10 +51,10 @@ export const getGames: RouteHandler = async (request, env) => {
       env.DB.prepare(dataQuery).bind(...queryParams, limit, offset).all()
     ]);
 
-    const total = countResult?.total || 0;
+    const total = (countResult?.total as number) || 0;
     const games = gamesResult.results || [];
 
-    return createPaginatedResponse(games, total, limit, offset);
+    return createPaginatedResponse(games, total as number, limit, offset);
 
   } catch (error: any) {
     return handleDatabaseError(error, 'getGames');
@@ -112,18 +112,18 @@ export const getGameById: RouteHandler = async (request, env, params) => {
     });
 
     const gameWithNotes: GameWithNotes = {
-      ...gameResult,
+      ...(gameResult as any),
       notes: {
-        id: gameResult.id,
-        status: gameResult.status || 'Inbox',
-        platform: gameResult.platform || '',
-        uri: gameResult.uri || '',
-        comment: gameResult.comment || ''
+        id: (gameResult as any).id,
+        status: (gameResult as any).status || 'Inbox',
+        platform: (gameResult as any).platform || '',
+        uri: (gameResult as any).uri || '',
+        comment: (gameResult as any).comment || ''
       },
       stats: {
-        totalPlays: statsResult?.totalPlays || 0,
-        lastPlayed: statsResult?.lastPlayed || undefined,
-        daysSinceLastPlayed: Math.floor(statsResult?.daysSince || 0),
+        totalPlays: ((statsResult as any)?.totalPlays as number) || 0,
+        lastPlayed: (statsResult as any)?.lastPlayed as string | undefined,
+        daysSinceLastPlayed: Math.floor(((statsResult as any)?.daysSince as number) || 0),
         wins
       }
     };
@@ -137,7 +137,7 @@ export const getGameById: RouteHandler = async (request, env, params) => {
 
 export const addGame: RouteHandler = async (request, env) => {
   try {
-    const body = await request.json();
+    const body = await request.json() as any;
     const bggId = body.bgg_id;
 
     if (!bggId || !validateGameId(bggId.toString())) {
@@ -173,7 +173,7 @@ export const updateGameNotes: RouteHandler = async (request, env, params) => {
       return createErrorResponse('INVALID_GAME_ID', 'Invalid game ID provided', 400);
     }
 
-    const body = await request.json();
+    const body = await request.json() as any;
     const { status, platform, uri, comment } = body;
 
     if (status && !validateGameStatus(status)) {

@@ -159,7 +159,7 @@ async function handleQuery(request: Request, env: Env): Promise<Response> {
       return authResult;
     }
 
-    const body = await request.json();
+    const body = await request.json() as any;
     const { sql } = body;
 
     if (!sql || typeof sql !== 'string') {

@@ -93,8 +93,8 @@ export function handleCORS(request: Request): Response | null {
 
 export function parseQueryParams(url: URL): Record<string, string | number> {
   const params: Record<string, string | number> = {};
-  
-  for (const [key, value] of url.searchParams.entries()) {
+
+  url.searchParams.forEach((value: string, key: string) => {
     if (key === 'limit' || key === 'offset') {
       const num = parseInt(value, 10);
       if (!isNaN(num) && num >= 0) {
@@ -103,8 +103,8 @@ export function parseQueryParams(url: URL): Record<string, string | number> {
     } else {
       params[key] = value;
     }
-  }
-  
+  });
+
   return params;
 }
 
@@ -118,7 +118,7 @@ export function validateGameId(id: string): number | null {
 
 export function validateDate(dateString: string): boolean {
   const date = new Date(dateString);
-  return !isNaN(date.getTime()) && dateString.match(/^\d{4}-\d{2}-\d{2}$/);
+  return !isNaN(date.getTime()) && !!dateString.match(/^\d{4}-\d{2}-\d{2}$/);
 }
 
 export function validateGameStatus(status: string): boolean {

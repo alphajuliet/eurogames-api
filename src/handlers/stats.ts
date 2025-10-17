@@ -27,7 +27,7 @@ export const getWinnerStats: RouteHandler = async (request, env) => {
       env.DB.prepare(dataQuery).bind(limit, offset).all()
     ]);
 
-    const total = countResult?.total || 0;
+    const total = (countResult?.total as number) || 0;
     const stats = statsResult.results || [];
 
     const formattedStats = stats.map((row: any) => ({
@@ -39,7 +39,7 @@ export const getWinnerStats: RouteHandler = async (request, env) => {
       draw: row.Draw || 0
     }));
 
-    return createPaginatedResponse(formattedStats, total, limit, offset);
+    return createPaginatedResponse(formattedStats, total as number, limit, offset);
 
   } catch (error: any) {
     return handleDatabaseError(error, 'getWinnerStats');
@@ -67,11 +67,11 @@ export const getOverallTotals: RouteHandler = async (request, env) => {
     }
 
     const totals: OverallTotals = {
-      totalGames: result.totalGames || 0,
+      totalGames: ((result as any).totalGames as number) || 0,
       players: {
-        Andrew: result.andrew || 0,
-        Trish: result.trish || 0,
-        Draw: result.draw || 0
+        Andrew: ((result as any).andrew as number) || 0,
+        Trish: ((result as any).trish as number) || 0,
+        Draw: ((result as any).draw as number) || 0
       }
     };
 
@@ -102,7 +102,7 @@ export const getLastPlayed: RouteHandler = async (request, env) => {
       env.DB.prepare(dataQuery).bind(limit, offset).all()
     ]);
 
-    const total = countResult?.total || 0;
+    const total = (countResult?.total as number) || 0;
     const games = gamesResult.results || [];
 
     const formattedGames = games.map((row: any) => ({
@@ -113,7 +113,7 @@ export const getLastPlayed: RouteHandler = async (request, env) => {
       games: row.games || 0
     }));
 
-    return createPaginatedResponse(formattedGames, total, limit, offset);
+    return createPaginatedResponse(formattedGames, total as number, limit, offset);
 
   } catch (error: any) {
     return handleDatabaseError(error, 'getLastPlayed');
@@ -140,10 +140,10 @@ export const getRecentPlays: RouteHandler = async (request, env) => {
       env.DB.prepare(dataQuery).bind(limit, offset).all()
     ]);
 
-    const total = countResult?.total || 0;
+    const total = (countResult?.total as number) || 0;
     const plays = playsResult.results || [];
 
-    return createPaginatedResponse(plays, total, limit, offset);
+    return createPaginatedResponse(plays, total as number, limit, offset);
 
   } catch (error: any) {
     return handleDatabaseError(error, 'getRecentPlays');
@@ -201,14 +201,14 @@ export const getPlayerStats: RouteHandler = async (request, env, params) => {
       env.DB.prepare(winRateQuery).bind(player).first()
     ]);
 
-    const winRate = winRateResult?.totalGames > 0 
-      ? ((winRateResult.wins / winRateResult.totalGames) * 100).toFixed(1)
+    const winRate = ((winRateResult as any)?.totalGames as number) > 0
+      ? ((((winRateResult as any).wins as number) / ((winRateResult as any).totalGames as number)) * 100).toFixed(1)
       : '0.0';
 
     const playerStats = {
       player,
-      gamesPlayed: gamesResult?.gamesPlayed || 0,
-      totalPlays: playsResult?.totalPlays || 0,
+      gamesPlayed: ((gamesResult as any)?.gamesPlayed as number) || 0,
+      totalPlays: ((playsResult as any)?.totalPlays as number) || 0,
       winRate: parseFloat(winRate),
       recentWins: recentResult.results || []
     };
@@ -272,10 +272,10 @@ export const getGameStats: RouteHandler = async (request, env) => {
 
     const gameStats = {
       summary: {
-        totalGames: summaryResult?.totalGames || 0,
-        uniqueGames: summaryResult?.uniqueGames || 0,
-        averageComplexity: summaryResult?.avgComplexity 
-          ? parseFloat(summaryResult.avgComplexity.toFixed(2))
+        totalGames: ((summaryResult as any)?.totalGames as number) || 0,
+        uniqueGames: ((summaryResult as any)?.uniqueGames as number) || 0,
+        averageComplexity: (summaryResult as any)?.avgComplexity
+          ? parseFloat(((summaryResult as any).avgComplexity as number).toFixed(2))
           : 0
       },
       topCategories: categoriesResult.results || [],

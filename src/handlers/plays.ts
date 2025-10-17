@@ -72,10 +72,10 @@ export const getPlays: RouteHandler = async (request, env) => {
       env.DB.prepare(dataQuery).bind(...queryParams, limit, offset).all()
     ]);
 
-    const total = countResult?.total || 0;
+    const total = (countResult?.total as number) || 0;
     const plays = playsResult.results || [];
 
-    return createPaginatedResponse(plays, total, limit, offset);
+    return createPaginatedResponse(plays, total as number, limit, offset);
 
   } catch (error: any) {
     return handleDatabaseError(error, 'getPlays');
@@ -110,7 +110,7 @@ export const getPlayById: RouteHandler = async (request, env, params) => {
 
 export const addPlay: RouteHandler = async (request, env) => {
   try {
-    const body = await request.json();
+    const body = await request.json() as any;
     const { game_id, date, winner, scores, comment } = body;
 
     if (!game_id) {
@@ -189,7 +189,7 @@ export const updatePlay: RouteHandler = async (request, env, params) => {
       return createErrorResponse('INVALID_PLAY_ID', 'Invalid play ID provided', 400);
     }
 
-    const body = await request.json();
+    const body = await request.json() as any;
     const { game_id, date, winner, scores, comment } = body;
 
     const existingPlay = await env.DB.prepare('SELECT rowid FROM log WHERE rowid = ?')
@@ -346,10 +346,10 @@ export const getGameHistory: RouteHandler = async (request, env, params) => {
       env.DB.prepare(dataQuery).bind(gameId, limit, offset).all()
     ]);
 
-    const total = countResult?.total || 0;
+    const total = (countResult?.total as number) || 0;
     const history = historyResult.results || [];
 
-    return createPaginatedResponse(history, total, limit, offset);
+    return createPaginatedResponse(history, total as number, limit, offset);
 
   } catch (error: any) {
     return handleDatabaseError(error, 'getGameHistory');
