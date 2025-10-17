@@ -1,0 +1,11 @@
+name = "games"
+compatibility_date = "2025-08-10"
+main = "src/index.ts"
+
+[vars]
+REQUIRE_AUTH = "true"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "games"
+database_id = "44c53350-cc74-44bd-a41a-ad20a64cdc8e"
