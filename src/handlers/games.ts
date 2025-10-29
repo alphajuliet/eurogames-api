@@ -14,18 +14,27 @@ export const getGames: RouteHandler = async (request, env) => {
   try {
     const url = new URL(request.url);
     const params = parseQueryParams(url) as GameListParams;
-    
-    const status = params.status || 'Playing';
+
+    const status = params.status || null;
     const limit = Math.min(params.limit || 100, 500);
     const offset = params.offset || 0;
     const search = params.search ? sanitizeInput(params.search as string) : null;
     const sort = params.sort || 'name';
 
-    let whereClause = 'WHERE status = ?';
-    let queryParams: any[] = [status];
+    let whereClause = '';
+    let queryParams: any[] = [];
+
+    if (status) {
+      whereClause = 'WHERE status = ?';
+      queryParams.push(status);
+    }
 
     if (search) {
-      whereClause += ' AND name LIKE ?';
+      if (whereClause) {
+        whereClause += ' AND name LIKE ?';
+      } else {
+        whereClause = 'WHERE name LIKE ?';
+      }
       queryParams.push(`%${search}%`);
     }
 
@@ -33,14 +42,14 @@ export const getGames: RouteHandler = async (request, env) => {
     const sortColumn = validSortColumns.includes(sort) ? sort : 'name';
 
     const countQuery = `
-      SELECT COUNT(*) as total 
-      FROM game_list2 
+      SELECT COUNT(*) as total
+      FROM game_list2
       ${whereClause}
     `;
 
     const dataQuery = `
       SELECT id, name, status, complexity, ranking, games, lastPlayed, uri
-      FROM game_list2 
+      FROM game_list2
       ${whereClause}
       ORDER BY ${sortColumn}
       LIMIT ? OFFSET ?
