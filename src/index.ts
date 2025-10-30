@@ -2,12 +2,13 @@ import { Env, RouteHandler, AuthContext } from './types';
 import { handleCORS, createErrorResponse, matchesPattern, extractPathParams } from './utils';
 import { authenticateRequest } from './middleware/auth';
 
-import { 
-  getGames, 
-  getGameById, 
-  addGame, 
-  updateGameNotes, 
-  syncGameData 
+import {
+  getGames,
+  getGameById,
+  addGame,
+  updateGameNotes,
+  updateGameData,
+  syncGameData
 } from './handlers/games';
 
 import { 
@@ -40,6 +41,7 @@ const routes: Route[] = [
   { method: 'GET', pattern: '/v1/games/{id}', handler: getGameById },
   { method: 'POST', pattern: '/v1/games', handler: addGame },
   { method: 'PATCH', pattern: '/v1/games/{id}/notes', handler: updateGameNotes },
+  { method: 'PATCH', pattern: '/v1/games/{id}/data', handler: updateGameData },
   { method: 'PUT', pattern: '/v1/games/{id}/sync', handler: syncGameData },
   
   // Game history (specific game plays)
@@ -240,6 +242,7 @@ async function handleRoot(request: Request): Promise<Response> {
         'GET /v1/games/{id}': 'Get game details [read]',
         'POST /v1/games': 'Add new game from BGG [write]',
         'PATCH /v1/games/{id}/notes': 'Update game notes [write]',
+        'PATCH /v1/games/{id}/data': 'Update BGG game data [write]',
         'PUT /v1/games/{id}/sync': 'Sync game data from BGG [write]',
         'GET /v1/games/{id}/history': 'Get game play history [read]'
       },

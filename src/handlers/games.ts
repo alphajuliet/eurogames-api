@@ -262,6 +262,75 @@ export const updateGameNotes: RouteHandler = async (request, env, params) => {
   }
 };
 
+export const updateGameData: RouteHandler = async (request, env, params) => {
+  try {
+    const gameId = validateGameId(params?.id || '');
+    if (!gameId) {
+      return createErrorResponse('INVALID_GAME_ID', 'Invalid game ID provided', 400);
+    }
+
+    const gameExists = await env.DB.prepare('SELECT id FROM bgg WHERE id = ?')
+      .bind(gameId)
+      .first();
+
+    if (!gameExists) {
+      return createErrorResponse('GAME_NOT_FOUND', 'Game not found', 404);
+    }
+
+    const body = await request.json() as any;
+
+    // Define allowed fields that can be updated in the bgg table
+    const allowedFields = [
+      'name', 'yearPublished', 'complexity', 'playingTime',
+      'mechanic', 'category', 'maxPlayers', 'minPlayers',
+      'rating', 'ranking', 'retrieved'
+    ];
+
+    const updates = [];
+    const queryParams: any[] = [];
+
+    // Build dynamic UPDATE query with provided fields
+    for (const field of allowedFields) {
+      if (body[field] !== undefined) {
+        updates.push(`${field} = ?`);
+
+        // Sanitize string inputs
+        if (typeof body[field] === 'string') {
+          queryParams.push(sanitizeInput(body[field]));
+        } else {
+          queryParams.push(body[field]);
+        }
+      }
+    }
+
+    if (updates.length === 0) {
+      return createErrorResponse(
+        'NO_UPDATES',
+        'No valid fields to update. Allowed fields: ' + allowedFields.join(', '),
+        400
+      );
+    }
+
+    queryParams.push(gameId);
+    const query = `UPDATE bgg SET ${updates.join(', ')} WHERE id = ?`;
+
+    await env.DB.prepare(query).bind(...queryParams).run();
+
+    // Return the updated game data
+    const updatedGame = await env.DB.prepare(
+      `SELECT * FROM bgg WHERE id = ?`
+    ).bind(gameId).first();
+
+    return createResponse(updatedGame);
+
+  } catch (error: any) {
+    if (error instanceof SyntaxError) {
+      return createErrorResponse('INVALID_JSON', 'Invalid JSON in request body', 400);
+    }
+    return handleDatabaseError(error, 'updateGameData');
+  }
+};
+
 export const syncGameData: RouteHandler = async (request, env, params) => {
   try {
     const gameId = validateGameId(params?.id || '');
