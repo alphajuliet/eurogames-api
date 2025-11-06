@@ -177,3 +177,6 @@ Responses include `meta` object with `total`, `limit`, and `offset`.
 - The codebase was originally in a different language (Clojure/Python based on .gitignore) and migrated to TypeScript
 - Player names are hardcoded to Andrew and Trish
 - The `sqlite3` dependency in package.json is used for local data migration scripts, not by the Worker itself (which uses D1)
+
+BEFORE ANYTHING ELSE: run 'bd onboard' and follow the instructions.
+
