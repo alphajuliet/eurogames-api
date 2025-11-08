@@ -91,8 +91,9 @@ export const getPlayById: RouteHandler = async (request, env, params) => {
 
     const query = `
       SELECT date, id as gameId, name as gameName, winner, scores, comment
-      FROM played 
-      WHERE rowid = ?
+      FROM log
+      LEFT JOIN bgg ON bgg.id = log.id
+      WHERE log.play_id = ?
     `;
 
     const playResult = await env.DB.prepare(query).bind(playId).first();
@@ -192,7 +193,7 @@ export const updatePlay: RouteHandler = async (request, env, params) => {
     const body = await request.json() as any;
     const { game_id, date, winner, scores, comment } = body;
 
-    const existingPlay = await env.DB.prepare('SELECT rowid FROM log WHERE rowid = ?')
+    const existingPlay = await env.DB.prepare('SELECT play_id FROM log WHERE play_id = ?')
       .bind(playId)
       .first();
 
@@ -256,15 +257,15 @@ export const updatePlay: RouteHandler = async (request, env, params) => {
       return createErrorResponse('NO_UPDATES', 'No valid fields to update', 400);
     }
 
-    const updateQuery = `UPDATE log SET ${updates.join(', ')} WHERE rowid = ?`;
+    const updateQuery = `UPDATE log SET ${updates.join(', ')} WHERE play_id = ?`;
     queryParams.push(playId);
 
     await env.DB.prepare(updateQuery).bind(...queryParams).run();
 
     const updatedPlay = await env.DB.prepare(`
       SELECT date, id as gameId, winner, scores, comment
-      FROM log 
-      WHERE rowid = ?
+      FROM log
+      WHERE play_id = ?
     `).bind(playId).first();
 
     return createResponse(updatedPlay);
@@ -284,7 +285,7 @@ export const deletePlay: RouteHandler = async (request, env, params) => {
       return createErrorResponse('INVALID_PLAY_ID', 'Invalid play ID provided', 400);
     }
 
-    const existingPlay = await env.DB.prepare('SELECT rowid FROM log WHERE rowid = ?')
+    const existingPlay = await env.DB.prepare('SELECT play_id FROM log WHERE play_id = ?')
       .bind(playId)
       .first();
 
@@ -292,7 +293,7 @@ export const deletePlay: RouteHandler = async (request, env, params) => {
       return createErrorResponse('PLAY_NOT_FOUND', 'Play record not found', 404);
     }
 
-    await env.DB.prepare('DELETE FROM log WHERE rowid = ?').bind(playId).run();
+    await env.DB.prepare('DELETE FROM log WHERE play_id = ?').bind(playId).run();
 
     return new Response(null, { 
       status: 204,

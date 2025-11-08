@@ -40,7 +40,7 @@ export interface GameStats {
 }
 
 export interface PlayRecord {
-  id?: number;
+  id: number;  // play_id: unique identifier for the play record
   date: string;
   gameId: number;
   gameName?: string;
