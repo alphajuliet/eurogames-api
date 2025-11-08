@@ -23,19 +23,17 @@ export function extractApiKey(request: Request): string | null {
 
 export async function validateApiKey(key: string, env: Env): Promise<AuthResult> {
   try {
-    // EUROGAMES_API_KEY format: "key:permission"
-    const apiKeyEntry = env.EUROGAMES_API_KEY;
-    if (!apiKeyEntry) {
+    const eurogamesKey = env.EUROGAMES_API_KEY;
+    if (!eurogamesKey) {
       return { valid: false, permissions: [] };
     }
 
-    const [keyValue, permissionLevel] = apiKeyEntry.trim().split(':');
-    if (keyValue === key) {
-      const permissions = getPermissionsForLevel(permissionLevel);
+    if (key === eurogamesKey) {
+      // EUROGAMES_API_KEY has full admin permissions
       return {
         valid: true,
-        permissions,
-        keyId: keyValue.slice(0, 8) + '...'
+        permissions: ['read', 'write', 'delete', 'export', 'query'],
+        keyId: key.slice(0, 8) + '...'
       };
     }
 

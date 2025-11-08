@@ -4,8 +4,9 @@ main = "src/index.ts"
 
 [vars]
 REQUIRE_AUTH = "true"
-# EUROGAMES_API_KEY environment variable should contain the API key with permissions
-# Format: "key:permission" (e.g., "my-key:admin")
+# EUROGAMES_API_KEY environment variable should contain the API key
+# The key has full admin permissions (read, write, delete, export, query)
+# Set via: wrangler secret put EUROGAMES_API_KEY
 
 [[d1_databases]]
 binding = "DB"
