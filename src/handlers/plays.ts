@@ -60,8 +60,8 @@ export const getPlays: RouteHandler = async (request, env) => {
     `;
 
     const dataQuery = `
-      SELECT date, id, name, winner, scores, comment
-      FROM played 
+      SELECT play_id, date, id, name, winner, scores, comment
+      FROM played
       ${whereClause}
       ORDER BY date DESC
       LIMIT ? OFFSET ?
@@ -90,7 +90,7 @@ export const getPlayById: RouteHandler = async (request, env, params) => {
     }
 
     const query = `
-      SELECT date, id as gameId, name as gameName, winner, scores, comment
+      SELECT play_id, date, id, name, winner, scores, comment
       FROM log
       LEFT JOIN bgg ON bgg.id = log.id
       WHERE log.play_id = ?
@@ -263,7 +263,7 @@ export const updatePlay: RouteHandler = async (request, env, params) => {
     await env.DB.prepare(updateQuery).bind(...queryParams).run();
 
     const updatedPlay = await env.DB.prepare(`
-      SELECT date, id as gameId, winner, scores, comment
+      SELECT play_id, date, id, winner, scores, comment
       FROM log
       WHERE play_id = ?
     `).bind(playId).first();
@@ -335,8 +335,8 @@ export const getGameHistory: RouteHandler = async (request, env, params) => {
     `;
 
     const dataQuery = `
-      SELECT date, winner, scores, comment
-      FROM log 
+      SELECT play_id, date, winner, scores, comment
+      FROM log
       WHERE id = ?
       ORDER BY date DESC
       LIMIT ? OFFSET ?
