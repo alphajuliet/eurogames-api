@@ -112,30 +112,44 @@ POST /v1/games/sync
 
 #### Plays
 
+Each play record has a unique `play_id` that is returned in API responses. Use `play_id` to identify and modify specific play records.
+
 ```http
 # Get all plays
 GET /v1/plays?limit=50&offset=0
 
-# Get single play
-GET /v1/plays/{id}
+# Get single play by play_id
+GET /v1/plays/{play_id}
 
-# Get plays for a specific game
-GET /v1/games/{id}/plays
+# Get play history for a specific game
+GET /v1/games/{game_id}/history?limit=50&offset=0
 
 # Record a new play
 POST /v1/plays
 Content-Type: application/json
 
 {
-  "gameId": 123,
+  "game_id": 123,
   "date": "2025-01-15",
   "winner": "Andrew",
   "scores": "Andrew:95,Trish:87",
   "comment": "Close game!"
 }
 
-# Update a play
-PUT /v1/plays/{id}
+# Response includes play_id for future references
+{
+  "data": {
+    "play_id": 42,
+    "date": "2025-01-15",
+    "gameId": 123,
+    "winner": "Andrew",
+    "scores": "Andrew:95,Trish:87",
+    "comment": "Close game!"
+  }
+}
+
+# Update a play using its play_id
+PATCH /v1/plays/{play_id}
 Content-Type: application/json
 
 {
@@ -143,8 +157,8 @@ Content-Type: application/json
   "scores": "Andrew:87,Trish:95"
 }
 
-# Delete a play
-DELETE /v1/plays/{id}
+# Delete a play using its play_id
+DELETE /v1/plays/{play_id}
 ```
 
 #### Statistics
@@ -229,9 +243,9 @@ User notes and metadata about games
 
 #### log
 Play session records
-- `rowid` (INTEGER PRIMARY KEY)
+- `play_id` (INTEGER PRIMARY KEY AUTOINCREMENT): Unique identifier for each play record
 - `date` (TEXT): YYYY-MM-DD format
-- `id` (INTEGER, references bgg.id)
+- `id` (INTEGER, references bgg.id): BoardGameGeek game ID
 - `winner` (TEXT): Andrew, Trish, or Draw
 - `scores` (TEXT): Comma-separated player:score pairs
 - `comment` (TEXT): Play notes
