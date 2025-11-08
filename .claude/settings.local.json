@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bd update:*)",
+      "Bash(wrangler d1 execute:*)",
+      "Bash(bd list:*)",
+      "Bash(bd create:*)",
+      "Bash(bd ready:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
