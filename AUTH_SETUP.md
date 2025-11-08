@@ -37,7 +37,17 @@ curl https://your-worker.workers.dev/v1/games
 
 ### 4. Development Mode
 
-For local development, set `REQUIRE_AUTH=false` in wrangler.toml or as an environment variable to disable authentication.
+For development and testing, default API keys are configured in `wrangler.toml`:
+
+```
+dev-admin-key-12345:admin       # Full access for testing
+dev-user-key-67890:user         # Read/write only
+dev-readonly-key-11111:read-only # Read-only access
+```
+
+Use these keys for development. Replace with secure values in production using `wrangler secret put API_KEYS`.
+
+Alternatively, set `REQUIRE_AUTH=false` in wrangler.toml to disable authentication entirely during development.
 
 ### 5. Key Management Best Practices
 
@@ -97,4 +107,14 @@ curl -X POST \
 # Export data (requires 'export' permission - admin only)
 curl -H "Authorization: Bearer my-admin-key-abc123" \
   "https://games.your-subdomain.workers.dev/v1/export"
+
+# Delete a play record (requires 'delete' permission - admin only)
+curl -X DELETE \
+  -H "Authorization: Bearer my-admin-key-abc123" \
+  "https://games.your-subdomain.workers.dev/v1/plays/491"
+
+# Using development keys from wrangler.toml
+curl -X DELETE \
+  -H "Authorization: Bearer dev-admin-key-12345" \
+  "https://games.your-subdomain.workers.dev/v1/plays/491"
 ```

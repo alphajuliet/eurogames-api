@@ -4,6 +4,8 @@ main = "src/index.ts"
 
 [vars]
 REQUIRE_AUTH = "true"
+# Default development API keys - replace with secure values in production
+API_KEYS = "dev-admin-key-12345:admin,dev-user-key-67890:user,dev-readonly-key-11111:read-only"
 
 [[d1_databases]]
 binding = "DB"
