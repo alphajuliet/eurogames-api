@@ -2,17 +2,19 @@
 
 ## Setting API Keys
 
-### 1. Set API Keys Secret
+### 1. Set API Key Secret
 
-Use the wrangler CLI to set API keys as a secret:
+Use the wrangler CLI to set the API key as a secret:
 
 ```bash
-# Set API keys (format: key:permission,key:permission,...)
-wrangler secret put API_KEYS
+# Set API key (format: key:permission)
+wrangler secret put EUROGAMES_API_KEY
 
 # Example input when prompted:
-# admin-key-2024:admin,user-key-2024:user,readonly-key-2024:read-only
+# admin-key-2024:admin
 ```
+
+The EUROGAMES_API_KEY environment variable should contain a single API key entry with the format `key:permission` where permission is one of: admin, user, or read-only.
 
 ### 2. Permission Levels
 
@@ -37,17 +39,15 @@ curl https://your-worker.workers.dev/v1/games
 
 ### 4. Development Mode
 
-For development and testing, default API keys are configured in `wrangler.toml`:
+For local development, set `REQUIRE_AUTH=false` in wrangler.toml to disable authentication entirely, or set `EUROGAMES_API_KEY` with a test key in your development environment.
 
+Example for testing locally:
+```bash
+# Disable auth for development
+wrangler dev  # Uses REQUIRE_AUTH=false setting in wrangler.toml
 ```
-dev-admin-key-12345:admin       # Full access for testing
-dev-user-key-67890:user         # Read/write only
-dev-readonly-key-11111:read-only # Read-only access
-```
 
-Use these keys for development. Replace with secure values in production using `wrangler secret put API_KEYS`.
-
-Alternatively, set `REQUIRE_AUTH=false` in wrangler.toml to disable authentication entirely during development.
+For production, always use `wrangler secret put EUROGAMES_API_KEY` to securely store the API key.
 
 ### 5. Key Management Best Practices
 
@@ -79,27 +79,29 @@ Alternatively, set `REQUIRE_AUTH=false` in wrangler.toml to disable authenticati
 
 ## Examples
 
-### Create API Keys
+### Create API Key
 
 ```bash
-# Generate secure keys
+# Generate secure key
 openssl rand -hex 32  # Generate random key
 
-# Set multiple keys
-wrangler secret put API_KEYS
-# Enter: my-admin-key-abc123:admin,my-user-key-def456:user
+# Set the API key
+wrangler secret put EUROGAMES_API_KEY
+# Enter: my-admin-key-abc123:admin
 ```
 
 ### API Usage
 
+Assuming your EUROGAMES_API_KEY is set to `my-admin-key-abc123:admin`:
+
 ```bash
 # Read games (requires 'read' permission)
-curl -H "Authorization: Bearer my-user-key-def456" \
+curl -H "Authorization: Bearer my-admin-key-abc123" \
   "https://games.your-subdomain.workers.dev/v1/games?limit=5"
 
-# Add a play record (requires 'write' permission)  
+# Add a play record (requires 'write' permission)
 curl -X POST \
-  -H "Authorization: Bearer my-user-key-def456" \
+  -H "Authorization: Bearer my-admin-key-abc123" \
   -H "Content-Type: application/json" \
   -d '{"game_id": 123, "winner": "Andrew", "scores": "85-72"}' \
   "https://games.your-subdomain.workers.dev/v1/plays"
@@ -111,10 +113,5 @@ curl -H "Authorization: Bearer my-admin-key-abc123" \
 # Delete a play record (requires 'delete' permission - admin only)
 curl -X DELETE \
   -H "Authorization: Bearer my-admin-key-abc123" \
-  "https://games.your-subdomain.workers.dev/v1/plays/491"
-
-# Using development keys from wrangler.toml
-curl -X DELETE \
-  -H "Authorization: Bearer dev-admin-key-12345" \
   "https://games.your-subdomain.workers.dev/v1/plays/491"
 ```

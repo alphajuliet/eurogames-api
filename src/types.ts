@@ -1,6 +1,6 @@
 export interface Env {
   DB: D1Database;
-  API_KEYS?: string;
+  EUROGAMES_API_KEY?: string;
   REQUIRE_AUTH?: string;
 }
 

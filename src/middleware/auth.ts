@@ -23,22 +23,20 @@ export function extractApiKey(request: Request): string | null {
 
 export async function validateApiKey(key: string, env: Env): Promise<AuthResult> {
   try {
-    const apiKeysString = env.API_KEYS;
-    if (!apiKeysString) {
+    // EUROGAMES_API_KEY format: "key:permission"
+    const apiKeyEntry = env.EUROGAMES_API_KEY;
+    if (!apiKeyEntry) {
       return { valid: false, permissions: [] };
     }
 
-    const apiKeys = apiKeysString.split(',');
-    for (const keyEntry of apiKeys) {
-      const [keyValue, permissionLevel] = keyEntry.trim().split(':');
-      if (keyValue === key) {
-        const permissions = getPermissionsForLevel(permissionLevel);
-        return {
-          valid: true,
-          permissions,
-          keyId: keyValue.slice(0, 8) + '...'
-        };
-      }
+    const [keyValue, permissionLevel] = apiKeyEntry.trim().split(':');
+    if (keyValue === key) {
+      const permissions = getPermissionsForLevel(permissionLevel);
+      return {
+        valid: true,
+        permissions,
+        keyId: keyValue.slice(0, 8) + '...'
+      };
     }
 
     return { valid: false, permissions: [] };
