@@ -144,6 +144,39 @@ export function sanitizeInput(input: string): string {
   return input.trim().replace(/[<>]/g, '');
 }
 
+/**
+ * Strips SQL comments and validates that the query is a single, standalone
+ * SELECT statement. Returns the sanitized query to execute, or null if the
+ * input isn't a safe single SELECT (e.g. it hides a destructive statement
+ * behind a leading comment/CTE, or stacks multiple statements).
+ */
+export function extractSelectOnlyQuery(sql: string): string | null {
+  const withoutComments = sql
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .replace(/--[^\n]*/g, ' ')
+    .trim();
+
+  if (!withoutComments) {
+    return null;
+  }
+
+  const withoutTrailingSemicolon = withoutComments.replace(/;\s*$/, '');
+
+  if (withoutTrailingSemicolon.includes(';')) {
+    return null;
+  }
+
+  if (!/^select\b/i.test(withoutTrailingSemicolon)) {
+    return null;
+  }
+
+  if (/\bpragma\b/i.test(withoutTrailingSemicolon)) {
+    return null;
+  }
+
+  return withoutTrailingSemicolon;
+}
+
 export async function handleDatabaseError(error: Error, operation: string): Promise<Response> {
   console.error(`Database error in ${operation}:`, error);
   

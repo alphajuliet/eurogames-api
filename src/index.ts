@@ -1,5 +1,5 @@
 import { Env, RouteHandler, AuthContext } from './types';
-import { handleCORS, createErrorResponse, matchesPattern, extractPathParams } from './utils';
+import { handleCORS, createErrorResponse, matchesPattern, extractPathParams, extractSelectOnlyQuery } from './utils';
 import { authenticateRequest } from './middleware/auth';
 
 import {
@@ -172,26 +172,22 @@ async function handleQuery(request: Request, env: Env): Promise<Response> {
       );
     }
 
-    const trimmedSql = sql.trim().toLowerCase();
-    
-    if (trimmedSql.startsWith('drop') || 
-        trimmedSql.startsWith('delete') || 
-        trimmedSql.startsWith('update') || 
-        trimmedSql.startsWith('insert') ||
-        trimmedSql.includes('pragma')) {
+    const safeSql = extractSelectOnlyQuery(sql);
+
+    if (!safeSql) {
       return createErrorResponse(
         'FORBIDDEN_QUERY',
-        'Only SELECT queries are allowed',
+        'Only a single SELECT query is allowed',
         403
       );
     }
 
-    const result = await env.DB.prepare(sql).all();
-    
+    const result = await env.DB.prepare(safeSql).all();
+
     return new Response(JSON.stringify({
       data: result.results || [],
       meta: {
-        query: sql,
+        query: safeSql,
         rowCount: result.results?.length || 0
       }
     }, null, 2), {
