@@ -127,7 +127,7 @@ Routes use a pattern-based system with `{param}` syntax for path parameters:
 - **Game IDs**: Must be positive integers (`validateGameId()`)
 - **Dates**: Must be in YYYY-MM-DD format (`validateDate()`)
 - **Game Status**: Must be one of: Playing, Inbox, Completed, Sold, Wishlisted
-- **Winners**: Must be one of: Andrew, Trish, Draw
+- **Winners**: Must be one of: Andrew, Trish, Draw, Andrew & Trish (cooperative joint win — counts toward both players' totals in `/v1/stats/*`), Game (cooperative loss — its own standalone stats category)
 - **Players**: Must be one of: Andrew, Trish
 - All string inputs are sanitized using `sanitizeInput()` to remove `<>` characters
 

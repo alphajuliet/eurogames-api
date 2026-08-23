@@ -16,8 +16,8 @@ export const getWinnerStats: RouteHandler = async (request, env) => {
     const countQuery = 'SELECT COUNT(*) as total FROM winner';
     
     const dataQuery = `
-      SELECT name, id, Games, Andrew, Trish, Draw
-      FROM winner 
+      SELECT name, id, Games, Andrew, Trish, Draw, Game
+      FROM winner
       ORDER BY name ASC
       LIMIT ? OFFSET ?
     `;
@@ -36,7 +36,8 @@ export const getWinnerStats: RouteHandler = async (request, env) => {
       totalGames: row.Games,
       andrew: row.Andrew || 0,
       trish: row.Trish || 0,
-      draw: row.Draw || 0
+      draw: row.Draw || 0,
+      game: row.Game || 0
     }));
 
     return createPaginatedResponse(formattedStats, total as number, limit, offset);
@@ -49,11 +50,12 @@ export const getWinnerStats: RouteHandler = async (request, env) => {
 export const getOverallTotals: RouteHandler = async (request, env) => {
   try {
     const query = `
-      SELECT 
+      SELECT
         SUM(Games) as totalGames,
         SUM(Andrew) as andrew,
         SUM(Trish) as trish,
-        SUM(Draw) as draw
+        SUM(Draw) as draw,
+        SUM(Game) as game
       FROM winner
     `;
 
@@ -62,7 +64,7 @@ export const getOverallTotals: RouteHandler = async (request, env) => {
     if (!result) {
       return createResponse({
         totalGames: 0,
-        players: { Andrew: 0, Trish: 0, Draw: 0 }
+        players: { Andrew: 0, Trish: 0, Draw: 0, Game: 0 }
       });
     }
 
@@ -71,7 +73,8 @@ export const getOverallTotals: RouteHandler = async (request, env) => {
       players: {
         Andrew: ((result as any).andrew as number) || 0,
         Trish: ((result as any).trish as number) || 0,
-        Draw: ((result as any).draw as number) || 0
+        Draw: ((result as any).draw as number) || 0,
+        Game: ((result as any).game as number) || 0
       }
     };
 
@@ -167,30 +170,31 @@ export const getPlayerStats: RouteHandler = async (request, env, params) => {
       );
     }
 
+    // A joint 'Andrew & Trish' play counts as a win for either player.
     const gamesPlayedQuery = `
       SELECT COUNT(DISTINCT id) as gamesPlayed
-      FROM log 
-      WHERE winner = ?
+      FROM log
+      WHERE winner = ? OR winner = 'Andrew & Trish'
     `;
 
     const totalPlaysQuery = `
       SELECT COUNT(*) as totalPlays
-      FROM log 
-      WHERE winner = ?
+      FROM log
+      WHERE winner = ? OR winner = 'Andrew & Trish'
     `;
 
     const recentWinsQuery = `
       SELECT date, name, scores
-      FROM played 
-      WHERE winner = ?
+      FROM played
+      WHERE winner = ? OR winner = 'Andrew & Trish'
       ORDER BY date DESC
       LIMIT 10
     `;
 
     const winRateQuery = `
-      SELECT 
+      SELECT
         COUNT(*) as totalGames,
-        SUM(CASE WHEN winner = ? THEN 1 ELSE 0 END) as wins
+        SUM(CASE WHEN winner = ? OR winner = 'Andrew & Trish' THEN 1 ELSE 0 END) as wins
       FROM log
     `;
 

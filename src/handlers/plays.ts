@@ -1,4 +1,4 @@
-import { Env, PlayRecord, PlaysParams, RouteHandler } from '../types';
+import { Env, PlayRecord, PlaysParams, RouteHandler, VALID_WINNERS } from '../types';
 import { 
   createResponse, 
   createErrorResponse, 
@@ -140,11 +140,10 @@ export const addPlay: RouteHandler = async (request, env) => {
       return createErrorResponse('GAME_NOT_FOUND', 'Game not found', 404);
     }
 
-    const validPlayers = ['Andrew', 'Trish', 'Draw'];
-    if (!validPlayers.includes(winner)) {
+    if (!(VALID_WINNERS as readonly string[]).includes(winner)) {
       return createErrorResponse(
-        'INVALID_WINNER', 
-        'Winner must be one of: ' + validPlayers.join(', '), 
+        'INVALID_WINNER',
+        'Winner must be one of: ' + VALID_WINNERS.join(', '),
         400
       );
     }
@@ -231,11 +230,10 @@ export const updatePlay: RouteHandler = async (request, env, params) => {
     }
 
     if (winner !== undefined) {
-      const validPlayers = ['Andrew', 'Trish', 'Draw'];
-      if (!validPlayers.includes(winner)) {
+      if (!(VALID_WINNERS as readonly string[]).includes(winner)) {
         return createErrorResponse(
-          'INVALID_WINNER', 
-          'Winner must be one of: ' + validPlayers.join(', '), 
+          'INVALID_WINNER',
+          'Winner must be one of: ' + VALID_WINNERS.join(', '),
           400
         );
       }

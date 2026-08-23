@@ -39,6 +39,12 @@ export interface GameStats {
   wins: Record<string, number>;
 }
 
+// Valid values for a play's `winner` field. 'Andrew & Trish' is a cooperative
+// joint win (counts toward both players' individual win totals); 'Game' is a
+// cooperative loss (the game beats the players), tracked as its own category.
+export const VALID_WINNERS = ['Andrew', 'Trish', 'Draw', 'Andrew & Trish', 'Game'] as const;
+export type Winner = typeof VALID_WINNERS[number];
+
 export interface PlayRecord {
   id: number;  // play_id: unique identifier for the play record
   date: string;
@@ -56,6 +62,7 @@ export interface WinnerStats {
   andrew: number;
   trish: number;
   draw: number;
+  game: number;
 }
 
 export interface OverallTotals {
